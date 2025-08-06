@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}접근 불가{% endblock %}
+
+{% block content %}
+<div class="block-container">
+  <h1>접근 불가</h1>
+  <p>
+    현재 접속하신 IP는 허용된 목록에 없습니다.<br>
+    관리자에게 문의하여 허용된 IP로 등록해 주세요.
+  </p>
+  <a href="{{ url_for('login') }}" class="btn">로그인 화면으로 돌아가기</a>
+</div>
+{% endblock %}

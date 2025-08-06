@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}직원 목록{% endblock %}
+
+{% block content %}
+<div class="main-content">
+  <div class="card">
+    <h2 class="card-title">직원 목록</h2>
+
+    <!-- 검색 입력 -->
+    <div class="search-wrapper">
+      <input
+        type="text"
+        id="emp-search"
+        placeholder="이름/내선/MBTI로 검색..."
+        onkeyup="filterTable()"
+      />
+    </div>
+
+    <!-- ① 정의된 순서대로 팀 출력 -->
+    {% for team in team_order %}
+      {% set group = employees|selectattr('team_name','equalto',team)|list %}
+      {% if group %}
+        <h3 class="team-heading">&lt;{{ team }}&gt;</h3>
+        <div class="table-responsive">
+          <table class="emp-table">
+            <tbody>
+              {% for emp in group %}
+                <tr class="emp-row"
+                    onclick="location.href='{{ url_for('employee_detail', name=emp.name) }}'">
+                  <td>{{ emp.name }}</td>
+                  <td>{{ emp.team_name }}</td>
+                  <td>{{ emp.position }}</td>
+                  <td>{{ emp.extension_number }}</td>
+                  <td>{{ emp.mbti }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+    {% endfor %}
+
+    <!-- ② 나머지 팀들 출력 -->
+    {% for team in other_teams %}
+      <h3 class="team-heading">&lt;{{ team }}&gt;</h3>
+      <div class="table-responsive">
+        <table class="emp-table">
+          <tbody>
+            {% for emp in employees
+                  | selectattr('team_name','equalto',team)
+                  | list %}
+              <tr class="emp-row"
+                  onclick="location.href='{{ url_for('employee_detail', name=emp.name) }}'">
+                <td>{{ emp.name }}</td>
+                <td>{{ emp.team_name }}</td>
+                <td>{{ emp.position }}</td>
+                <td>{{ emp.extension_number }}</td>
+                <td>{{ emp.mbti }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endfor %}
+
+  </div>
+</div>
+
+<script>
+function filterTable() {
+  const filter = document.getElementById('emp-search').value.toLowerCase();
+  document.querySelectorAll('.emp-row').forEach(row => {
+    const texts = Array.from(row.cells).map(td => td.textContent.toLowerCase());
+    row.style.display = texts.some(t => t.includes(filter)) ? '' : 'none';
+  });
+}
+</script>
+{% endblock %}

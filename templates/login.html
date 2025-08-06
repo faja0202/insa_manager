@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}로그인{% endblock %}
+
+{% block content %}
+<div class="container login-page">
+  <div class="card login-card">
+    <div class="card-header">로그인</div>
+    <div class="card-body">
+
+      {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+          <ul id="messages">
+            {% for category, msg in messages %}
+              <li class="{{ category }}">{{ msg }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      {% endwith %}
+
+      <form action="{{ url_for('login') }}" method="post">
+        <!-- 로그인 후 돌아갈 페이지 정보 유지 -->
+        <input type="hidden" name="next" value="{{ request.args.get('next', '') }}">
+
+        <div class="profile-grid">
+          <div class="profile-item">
+            <label for="username" class="required">사용자명</label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              placeholder="사용자명 입력"
+              required
+            >
+          </div>
+          <div class="profile-item">
+            <label for="password" class="required">비밀번호</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="비밀번호 입력"
+              required
+            >
+          </div>
+        </div>
+
+        <div style="text-align: right; margin-top: 1.5rem;">
+          <button type="submit" class="btn">로그인</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}직원 프로필{% endblock %}
+
+{% block content %}
+<section class="employee-detail">
+  <h2 class="section-title">직원 프로필</h2>
+  <div class="profile-header">
+    <div class="profile-photo">
+      <img
+        src="{{ url_for('static', filename='uploads/photo/' ~ employee.name ~ '.png') }}"
+        alt="{{ employee.name }} 사진"
+      />
+    </div>
+    <div class="profile-summary">
+      <h3 class="employee-name">{{ employee.name }}</h3>
+      <p>팀: <span>{{ employee.team }}</span></p>
+      <p>직책: <span>{{ employee.position }}</span></p>
+      <p>근로 상태: <span>{{ '휴직 중' if employee.on_leave else '근무 중' }}</span></p>
+    </div>
+  </div>
+
+  <div class="profile-grid">
+    <div class="grid-item">
+      <strong>주민등록번호</strong>
+      <span>{{ employee.ssn }}</span>
+    </div>
+    <div class="grid-item">
+      <strong>생년월일</strong>
+      <span>{{ employee.birthdate }}</span>
+    </div>
+    <div class="grid-item">
+      <strong>주소</strong>
+      <span>{{ employee.address }}</span>
+    </div>
+    <div class="grid-item">
+      <strong>연락처</strong>
+      <span>{{ employee.phone }}</span>
+    </div>
+    <div class="grid-item">
+      <strong>비상연락처</strong>
+      <span>{{ employee.emergency_contact }}</span>
+    </div>
+    <div class="grid-item">
+      <strong>이메일</strong>
+      <span>{{ employee.email }}</span>
+    </div>
+    <div class="grid-item">
+      <strong>학력 (전공/학위/논문)</strong>
+      <span>{{ employee.education }}</span>
+    </div>
+    <div class="grid-item">
+      <strong>이전 직장 이력</strong>
+      <span>{{ employee.work_history }}</span>
+    </div>
+    <div class="grid-item">
+      <strong>입사일</strong>
+      <span>{{ employee.hire_date }}</span>
+    </div>
+    <div class="grid-item">
+      <strong>퇴사일</strong>
+      <span>{{ employee.exit_date or '-' }}</span>
+    </div>
+    <div class="grid-item">
+      <strong>퇴사 사유</strong>
+      <span>{{ employee.exit_reason or '-' }}</span>
+    </div>
+    <div class="grid-item">
+      <strong>자격증/면허</strong>
+      <span>{{ employee.certifications }}</span>
+    </div>
+    <div class="grid-item">
+      <strong>MBTI</strong>
+      <span>{{ employee.mbti }}</span>
+    </div>
+    <div class="grid-item">
+      <strong>STRONG</strong>
+      <span>{{ employee.strong_type }}</span>
+    </div>
+    <div class="grid-item">
+      <strong>FIRO-B (I/C/A)</strong>
+      <span>{{ employee.firo_i }}/{{ employee.firo_c }}/{{ employee.firo_a }}</span>
+    </div>
+    <div class="grid-item">
+      <strong>내부 교육 이력</strong>
+      <span>{{ employee.internal_training }}</span>
+    </div>
+    <div class="grid-item">
+      <strong>연봉</strong>
+      <span>{{ employee.salary }}</span>
+    </div>
+    <div class="grid-item">
+      <strong>징계/포상 이력</strong>
+      <span>{{ employee.discipline_awards }}</span>
+    </div>
+    <div class="grid-item">
+      <strong>최근 프로젝트</strong>
+      <span>{{ employee.recent_projects }}</span>
+    </div>
+    <div class="grid-item">
+      <strong>대표님 면담 기록</strong>
+      <span>{{ employee.ceo_meeting_notes }}</span>
+    </div>
+    <div class="grid-item">
+      <strong>특이사항 메모</strong>
+      <span>{{ employee.notes }}</span>
+    </div>
+  </div>
+</section>
+{% endblock %}
