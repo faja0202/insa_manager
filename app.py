@@ -38,20 +38,30 @@ def load_df():
     with EXCEL_LOCK:
         return pd.read_excel(EXCEL_PATH, engine="openpyxl", dtype=str).fillna("")
 
+# ---------- IP 화이트리스트 설정 ----------
+# (모듈 최상단에 한 번만 정의)
+IP_WHITELIST = {
+    "127.0.0.1",       # 로컬
+    "192.168.0.10",    # 사내망
+    "203.0.113.45",    # 허용 외부 IP
+}
+
 # ---------- IP 화이트리스트 체크 ----------
 @app.before_request
 def check_ip_whitelist():
-    # static 파일 요청은 건너뛰기
-    if request.endpoint == "static":
-        return
+    # 1) static 파일 로드, 2) 차단 페이지 자체는 예외
+    if request.endpoint in ("static", "ip_block"):
+        return  # 여기만 건너뛰고 나머지—login 포함—모두 체크
 
-    client_ip = request.remote_addr
+    client_ip = request.remote_addr or ""
 
-    # IP_WHITELIST가 비어 있지 않고, client_ip가 허용 목록에 없으면 차단
+    # 화이트리스트가 비어 있지 않고, client_ip가 목록에 없으면 차단
     if IP_WHITELIST and client_ip not in IP_WHITELIST:
+        # 접근 시도 로그 남기기 (선택)
+        app.logger.warning(f"Blocked IP {client_ip} accessing {request.path}")
         return redirect(url_for("ip_block"))
 
-
+# ---------- 차단 페이지 ----------
 @app.route("/ip_block")
 def ip_block():
     return render_template("ip_block.html"), 403
