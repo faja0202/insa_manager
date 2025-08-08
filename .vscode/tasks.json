@@ -1,0 +1,26 @@
+// .vscode/tasks.json
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Git: Sync",
+      "type": "shell",
+      "command": "git pull origin main && git add . && git commit -m \"${input:message}\" && git push origin main",
+      "group": "build",
+      "presentation": { "reveal": "always" },
+      "options": {
+        "shell": {
+          "executable": "C:\\Program Files\\Git\\bin\\bash.exe",
+          "args": ["-l", "-c"]
+        }
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "message",
+      "type": "promptString",
+      "description": "Commit message"
+    }
+  ]
+}
