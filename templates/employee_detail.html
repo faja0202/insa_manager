@@ -1,242 +1,190 @@
 {% extends "base.html" %}
 {% block title %}직원 프로필{% endblock %}
-
 {% block content %}
 <div class="container">
-    <div class="employee-detail">
-        <!-- 플래시 메시지 영역 -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <ul id="messages">
-                    {% for category, message in messages %}
-                        <li class="{{ category }}">{{ message }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-        {% endwith %}
+  <div class="employee-detail">
+    <!-- 플래시 메시지 영역 -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul id="messages">
+          {% for category, message in messages %}
+            <li class="{{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
 
-        <div class="tabs">
-            <div class="tab active" data-target="basic-info">기본 정보</div>
-            <div class="tab" data-target="extended-info">상세 정보</div>
-        </div>
-
-        <div class="form-actions">
-            <button type="button" id="edit-btn" class="btn">수정</button>
-            <button type="submit" id="save-btn" form="detail-form" class="btn" style="display: none;">저장</button>
-        </div>
-
-        <form id="detail-form" method="POST" action="{{ url_for('employee_detail', name=employee.name if employee else '') }}">
-            <!-- 기본 정보 섹션 -->
-            <section id="basic-info" class="profile-section active">
-                <h2 class="section-title">기본 정보</h2>
-                <div class="profile-header">
-                    <div class="profile-photo">
-                        <img src="{{ url_for('static', filename='uploads/photo/' ~ (employee.name if employee else 'default') ~ '.png') }}" 
-                             alt="프로필 사진" 
-                             onerror="this.src='{{ url_for('static', filename='images/default-profile.png') }}'">
-                    </div>
-                    <div class="profile-summary">
-                        <div class="profile-item">
-                            <label>이름</label>
-                            <input type="text" name="name" value="{{ employee.name if employee else '' }}" readonly>
-                        </div>
-                        <div class="profile-item">
-                            <label>팀 소속</label>
-                            <input type="text" name="team_name" value="{{ employee.team_name if employee else '' }}">
-                        </div>
-                        <div class="profile-item">
-                            <label>직책</label>
-                            <input type="text" name="position" value="{{ employee.position if employee else '' }}">
-                        </div>
-                        <div class="profile-item">
-                            <label>내선번호</label>
-                            <input type="text" name="extension_number" value="{{ employee.extension_number if employee else '' }}">
-                        </div>
-                    </div>
-                </div>
-                <div class="profile-grid">
-                    <div class="profile-item">
-                        <label>주민등록번호</label>
-                        <input type="text" name="ssn" value="{{ employee.ssn if employee and employee.ssn else '' }}">
-                    </div>
-                    <div class="profile-item">
-                        <label>생년월일</label>
-                        <input type="date" name="birthdate" value="{{ employee.birthdate if employee and employee.birthdate else '' }}">
-                    </div>
-                    <div class="profile-item">
-                        <label>연락처</label>
-                        <input type="text" name="phone_number" value="{{ employee.phone_number if employee else '' }}">
-                    </div>
-                    <div class="profile-item">
-                        <label>비상연락처</label>
-                        <input type="text" name="emergency_contact" value="{{ employee.emergency_contact if employee and employee.emergency_contact else '' }}">
-                    </div>
-                    <div class="profile-item">
-                        <label>MBTI 유형</label>
-                        <input type="text" name="mbti" value="{{ employee.mbti if employee else '' }}">
-                    </div>
-                    <div class="profile-item">
-                        <label>STRONG 유형</label>
-                        <input type="text" name="strong_type" value="{{ employee.strong_type if employee and employee.strong_type else '' }}">
-                    </div>
-                    <div class="profile-item">
-                        <label>FIRO-B (I/C/A)</label>
-                        <div class="firo-group">
-                            <input type="text" name="firo_i" value="{{ employee.firo_i if employee and employee.firo_i else '' }}" placeholder="I">
-                            <input type="text" name="firo_c" value="{{ employee.firo_c if employee and employee.firo_c else '' }}" placeholder="C">
-                            <input type="text" name="firo_a" value="{{ employee.firo_a if employee and employee.firo_a else '' }}" placeholder="A">
-                        </div>
-                    </div>
-                    <div class="profile-item">
-                        <label>내부 교육</label>
-                        <input type="text" name="internal_training" value="{{ employee.internal_training if employee and employee.internal_training else '' }}">
-                    </div>
-                    <div class="profile-item">
-                        <label>이메일</label>
-                        <input type="email" name="email" value="{{ employee.email if employee and employee.email else '' }}">
-                    </div>
-                    <div class="profile-item">
-                        <label>입사일</label>
-                        <input type="date" name="hire_date" value="{{ employee.hire_date if employee else '' }}">
-                    </div>
-                    <div class="profile-item">
-                        <label>퇴사일</label>
-                        <input type="date" name="exit_date" value="{{ employee.exit_date if employee and employee.exit_date else '' }}">
-                    </div>
-                    <div class="profile-item">
-                        <label>퇴사 사유</label>
-                        <input type="text" name="exit_reason" value="{{ employee.exit_reason if employee and employee.exit_reason else '' }}">
-                    </div>
-                </div>
-            </section>
-
-            <!-- 상세 정보 섹션 -->
-            <section id="extended-info" class="profile-section">
-                <h2 class="section-title">상세 정보</h2>
-                <div class="profile-header">
-                    <div class="profile-photo">
-                        <img src="{{ url_for('static', filename='uploads/photo/' ~ (employee.name if employee else 'default') ~ '.png') }}"  
-                             alt="추가 사진"
-                             onerror="this.src='{{ url_for('static', filename='images/default-profile.png') }}'">
-                    </div>
-                    <div class="profile-summary">
-                        <div class="profile-item">
-                            <label>주소</label>
-                            <input type="text" name="address" value="{{ employee.address if employee and employee.address else '' }}">
-                        </div>
-                        <div class="profile-item">
-                            <label>학력 (전공)</label>
-                            <input type="text" name="education_major" value="{{ employee.education_major if employee and employee.education_major else '' }}">
-                        </div>
-                        <div class="profile-item">
-                            <label>학위</label>
-                            <input type="text" name="education_degree" value="{{ employee.education_degree if employee and employee.education_degree else '' }}">
-                        </div>
-                        <div class="profile-item">
-                            <label>논문</label>
-                            <input type="text" name="education_thesis" value="{{ employee.education_thesis if employee and employee.education_thesis else '' }}">
-                        </div>
-                    </div>
-                </div>
-                <div class="profile-grid">
-                    <div class="profile-item">
-                        <label>이전 직장 이력</label>
-                        <textarea name="work_history" rows="3">{{ employee.work_history if employee and employee.work_history else '' }}</textarea>
-                    </div>
-                    <div class="profile-item">
-                        <label>자격증·면허</label>
-                        <textarea name="certifications" rows="2">{{ employee.certifications if employee and employee.certifications else '' }}</textarea>
-                    </div>
-                    <div class="profile-item">
-                        <label>연봉</label>
-                        <input type="number" name="salary" value="{{ employee.salary if employee and employee.salary else '' }}">
-                    </div>
-                    <div class="profile-item">
-                        <label>징계·포상 이력</label>
-                        <textarea name="discipline_awards" rows="2">{{ employee.discipline_awards if employee and employee.discipline_awards else '' }}</textarea>
-                    </div>
-                    <div class="profile-item">
-                        <label>최근 주요 프로젝트</label>
-                        <textarea name="recent_projects" rows="2">{{ employee.recent_projects if employee and employee.recent_projects else '' }}</textarea>
-                    </div>
-                    <div class="profile-item">
-                        <label>대표님 면담 기록</label>
-                        <textarea name="ceo_meeting_notes" rows="3">{{ employee.ceo_meeting_notes if employee and employee.ceo_meeting_notes else '' }}</textarea>
-                    </div>
-                    <div class="profile-item profile-item-wide">
-                        <label>특이사항 메모</label>
-                        <textarea name="notes" rows="3">{{ employee.notes if employee and employee.notes else '' }}</textarea>
-                    </div>
-                </div>
-            </section>
-        </form>
+    <div class="tabs">
+      <div class="tab active" data-target="basic-info">기본 정보</div>
+      <div class="tab" data-target="extended-info">상세 정보</div>
     </div>
 
-    <!-- 로딩 오버레이 -->
-    <div class="loading-overlay" id="loading">
-        <div class="spinner"></div>
+    <div class="form-actions">
+      <button type="button" id="edit-btn" class="btn">수정</button>
+      <button type="submit" id="save-btn" form="detail-form" class="btn" style="display: none;">저장</button>
     </div>
+
+    <form id="detail-form" method="POST" action="{{ url_for('employee_detail', name=employee.name if employee else '') }}">
+      <!-- 기본 정보 섹션 -->
+      <section id="basic-info" class="profile-section active">
+        <h2 class="section-title">기본 정보</h2>
+        <div class="profile-header">
+          <div class="profile-photo">
+            <img src="{{ url_for('static', filename='uploads/photo/' ~ (employee.name if employee else 'default') ~ '.png') }}"
+                 alt="프로필 사진"
+                 onerror="this.src='{{ url_for('static', filename='images/default-profile.png') }}'">
+          </div>
+          <div class="profile-summary">
+            <div class="profile-item">
+              <label>이름</label>
+              <input type="text" name="name" value="{{ employee.name if employee else '' }}" readonly>
+            </div>
+            <div class="profile-item">
+              <label>팀 소속</label>
+              <input type="text" name="team_name" value="{{ employee.team_name if employee else '' }}">
+            </div>
+            <div class="profile-item">
+              <label>직책</label>
+              <input type="text" name="position" value="{{ employee.position if employee else '' }}">
+            </div>
+            <div class="profile-item">
+              <label>내선번호</label>
+              <input type="text" name="extension_number" value="{{ employee.extension_number if employee else '' }}">
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-grid">
+          <div class="profile-item">
+            <label>주민등록번호</label>
+            <input type="text" name="ssn" value="{{ employee.ssn if employee and employee.ssn else '' }}">
+          </div>
+          <div class="profile-item">
+            <label>생년월일</label>
+            <input type="date" name="birthdate" value="{{ employee.birthdate if employee and employee.birthdate else '' }}">
+          </div>
+          <div class="profile-item">
+            <label>연락처</label>
+            <input type="text" name="phone_number" value="{{ employee.phone_number if employee else '' }}">
+          </div>
+          <div class="profile-item">
+            <label>비상연락처</label>
+            <input type="text" name="emergency_contact" value="{{ employee.emergency_contact if employee and employee.emergency_contact else '' }}">
+          </div>
+          <div class="profile-item">
+            <label>MBTI 유형</label>
+            <input type="text" name="mbti" value="{{ employee.mbti if employee else '' }}">
+          </div>
+          <div class="profile-item">
+            <label>STRONG 유형</label>
+            <input type="text" name="strong_type" value="{{ employee.strong_type if employee and employee.strong_type else '' }}">
+          </div>
+          <div class="profile-item">
+            <label>FIRO-B (I/C/A)</label>
+            <div class="firo-group">
+              <input type="text" name="firo_i" value="{{ employee.firo_i if employee and employee.firo_i else '' }}" placeholder="I">
+              <input type="text" name="firo_c" value="{{ employee.firo_c if employee and employee.firo_c else '' }}" placeholder="C">
+              <input type="text" name="firo_a" value="{{ employee.firo_a if employee and employee.firo_a else '' }}" placeholder="A">
+            </div>
+          </div>
+
+          <!-- input → textarea + auto-list auto-grow -->
+          <div class="profile-item">
+            <label>내부 교육</label>
+            <textarea name="internal_training" rows="2" class="auto-list auto-grow">{{ employee.internal_training if employee and employee.internal_training else '' }}</textarea>
+          </div>
+
+          <div class="profile-item">
+            <label>이메일</label>
+            <input type="email" name="email" value="{{ employee.email if employee and employee.email else '' }}">
+          </div>
+          <div class="profile-item">
+            <label>입사일</label>
+            <input type="date" name="hire_date" value="{{ employee.hire_date if employee else '' }}">
+          </div>
+          <div class="profile-item">
+            <label>퇴사일</label>
+            <input type="date" name="exit_date" value="{{ employee.exit_date if employee and employee.exit_date else '' }}">
+          </div>
+          <div class="profile-item">
+            <label>퇴사 사유</label>
+            <input type="text" name="exit_reason" value="{{ employee.exit_reason if employee and employee.exit_reason else '' }}">
+          </div>
+        </div>
+      </section>
+
+      <!-- 상세 정보 섹션 -->
+      <section id="extended-info" class="profile-section">
+        <h2 class="section-title">상세 정보</h2>
+        <div class="profile-header">
+          <div class="profile-photo">
+            <img src="{{ url_for('static', filename='uploads/photo/' ~ (employee.name if employee else 'default') ~ '.png') }}"
+                 alt="추가 사진"
+                 onerror="this.src='{{ url_for('static', filename='images/default-profile.png') }}'">
+          </div>
+          <div class="profile-summary">
+            <div class="profile-item">
+              <label>주소</label>
+              <input type="text" name="address" value="{{ employee.address if employee and employee.address else '' }}">
+            </div>
+            <div class="profile-item">
+              <label>학력 (전공)</label>
+              <input type="text" name="major" value="{{ employee.major if employee and employee.major else '' }}">
+            </div>
+            <div class="profile-item">
+              <label>학위</label>
+              <input type="text" name="degree" value="{{ employee.degree if employee and employee.degree else '' }}">
+            </div>
+            <div class="profile-item">
+              <label>논문</label>
+              <input type="text" name="thesis" value="{{ employee.thesis if employee and employee.thesis else '' }}">
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-grid">
+          <div class="profile-item">
+            <label>이전 직장 이력</label>
+            <textarea name="work_history" rows="3" class="auto-list auto-grow">{{ employee.work_history if employee and employee.work_history else '' }}</textarea>
+          </div>
+          <div class="profile-item">
+            <label>자격증·면허</label>
+            <textarea name="certification" rows="2" class="auto-list auto-grow">{{ employee.certification if employee and employee.certification else '' }}</textarea>
+          </div>
+
+          <div class="profile-item">
+            <label>연봉</label>
+            <input type="number" name="salary" value="{{ employee.salary if employee and employee.salary else '' }}">
+          </div>
+
+          <div class="profile-item">
+            <label>징계·포상 이력</label>
+            <textarea name="discipline_awards" rows="2" class="auto-list auto-grow">{{ employee.discipline_awards if employee and employee.discipline_awards else '' }}</textarea>
+          </div>
+          <div class="profile-item">
+            <label>최근 주요 프로젝트</label>
+            <textarea name="recent_projects" rows="2" class="auto-list auto-grow">{{ employee.recent_projects if employee and employee.recent_projects else '' }}</textarea>
+          </div>
+
+          <div class="profile-item">
+            <label>대표님 면담 기록</label>
+            <textarea name="ceo_meeting_notes" rows="3">{{ employee.ceo_meeting_notes if employee and employee.ceo_meeting_notes else '' }}</textarea>
+          </div>
+          <div class="profile-item profile-item-wide">
+            <label>특이사항 메모</label>
+            <textarea name="notes" rows="3">{{ employee.notes if employee and employee.notes else '' }}</textarea>
+          </div>
+        </div>
+      </section>
+    </form>
+  </div>
+
+  <!-- 로딩 오버레이 -->
+  <div class="loading-overlay" id="loading">
+    <div class="spinner"></div>
+  </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const tabs = document.querySelectorAll('.tab');
-    const sections = document.querySelectorAll('.profile-section');
-
-    // 탭 클릭 이벤트
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            const targetId = tab.dataset.target;
-            
-            // 활성 탭 변경
-            tabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            
-            // 섹션 표시 변경
-            sections.forEach(section => {
-                section.classList.remove('active');
-                if (section.id === targetId) {
-                    section.classList.add('active');
-                }
-            });
-        });
-    });
-
-    // 폼 편집 기능
-    const form = document.getElementById('detail-form');
-    const inputs = form.querySelectorAll('input:not([readonly]), select, textarea');
-    const editBtn = document.getElementById('edit-btn');
-    const saveBtn = document.getElementById('save-btn');
-
-    // 초기 상태: 비활성화
-    inputs.forEach(input => input.disabled = true);
-
-    editBtn.addEventListener('click', () => {
-        const isDisabled = inputs[0].disabled;
-        
-        inputs.forEach(input => input.disabled = !isDisabled);
-        
-        if (isDisabled) {
-            editBtn.textContent = '취소';
-            saveBtn.style.display = 'inline-block';
-        } else {
-            editBtn.textContent = '수정';
-            saveBtn.style.display = 'none';
-        }
-    });
-
-    // 저장 버튼 클릭
-    saveBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        
-        // 로딩 표시
-        document.getElementById('loading').classList.add('active');
-        
-        // 실제 폼 제출
-        setTimeout(() => {
-            form.submit();
-        }, 500);
-    });
-});
-</script>
+<!-- 페이지 하단에서 스크립트 로드 (이 페이지 전용) -->
+<script src="{{ url_for('static', filename='scripts/employee_detail.js') }}"></script>
 {% endblock %}

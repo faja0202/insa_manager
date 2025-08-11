@@ -2,12 +2,25 @@
 {% block title %}접근 불가{% endblock %}
 
 {% block content %}
-<div class="block-container">
-  <h1>접근 불가</h1>
-  <p>
-    현재 접속하신 IP는 허용된 목록에 없습니다.<br>
-    관리자에게 문의하여 허용된 IP로 등록해 주세요.
-  </p>
-  <a href="{{ url_for('login') }}" class="btn">로그인 화면으로 돌아가기</a>
+<div class="container">
+  <div class="card" style="max-width:720px; margin:2rem auto; text-align:center;">
+    <div class="card-header">접근 불가</div>
+    <div class="card-body">
+      <p style="margin-bottom: .75rem; color: var(--color-grey);">
+        현재 접속하신 IP(<strong>{{ request.remote_addr }}</strong>)은(는) 허용된 목록에 없습니다.
+      </p>
+      <p class="muted" style="margin-bottom: 1rem;">
+        내부 네트워크 또는 허용된 IP에서 다시 시도해 주세요. 필요한 경우 관리자에게 화이트리스트 등록을 요청할 수 있습니다.
+      </p>
+      <div style="display:flex; gap:.5rem; justify-content:center; flex-wrap:wrap;">
+        <a href="{{ url_for('main') }}" class="btn secondary">홈으로</a>
+        <a href="{{ url_for('login') }}" class="btn">로그인 화면으로 돌아가기</a>
+      </div>
+    </div>
+  </div>
 </div>
+
+<style>
+  .muted{ color: var(--color-grey); }
+</style>
 {% endblock %}

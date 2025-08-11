@@ -2,20 +2,133 @@
 {% block title %}대시보드{% endblock %}
 
 {% block content %}
-  <div class="main-content">
-    <div class="card">
-      <h2>면담 기록 업로드</h2>
-      <button>+ 업로드하기</button>
+  <!-- 헤더/히어로 -->
+  <section class="card" aria-label="대시보드 인사말">
+    <div class="card-header">대시보드</div>
+    <div class="card-body">
+      <p style="margin-bottom:.75rem; color:var(--color-grey);">
+        안녕하세요{% if current_user and current_user.is_authenticated %}, <strong>{{ current_user.username }}</strong>님{% endif %}. 오늘도 좋은 하루 되세요!
+      </p>
+      <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
+        <a class="btn" href="{{ url_for('employee_list') }}">직원 목록</a>
+        <a class="btn secondary" href="{{ url_for('interview_records') }}">근태정보</a>
+        <a class="btn secondary" href="{{ url_for('ip_block') }}">IP 차단 테스트</a>
+      </div>
     </div>
+  </section>
+
+  <!-- 대시보드 그리드 -->
+  <section class="dashboard-grid" aria-label="주요 위젯">
+    <!-- 1) 면담 기록 작업 -->
     <div class="card">
-      <h2>최근 파일 수정</h2>
-      <p>대표님 – 2025-07-20</p>
+      <div class="card-header">면담 기록</div>
+      <div class="card-body">
+        <p style="color:var(--color-grey); margin-bottom:.75rem;">업로드/다운로드는 면담기록 페이지에서 진행합니다.</p>
+        <div style="display:flex; gap:.5rem; justify-content:flex-end;">
+          <a href="{{ url_for('profile') }}" class="btn">면담기록 바로가기</a>
+        </div>
+      </div>
     </div>
+
+    <!-- 2) 최근 변경 -->
     <div class="card">
-      <h2>DB 최종 수정일시</h2>
-      <ul>
-        <li>2025-08-06 00:00 </li>
-      </ul>
+      <div class="card-header">최근 변경</div>
+      <div class="card-body">
+        {% if recent_files %}
+          <ul>
+            {% for item in recent_files %}
+              <li style="margin:.25rem 0;">
+                <strong>{{ item.title }}</strong>
+                <span style="color:var(--color-grey);"> — {{ item.owner }} · {{ item.updated_at }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p style="color:var(--color-grey);">최근 변경 이력이 없습니다.</p>
+        {% endif %}
+      </div>
     </div>
+
+    <!-- 3) 직원 빠른 검색 -->
+    <div class="card">
+      <div class="card-header">직원 빠른 검색</div>
+      <div class="card-body">
+        <div style="display:flex; gap:.5rem;">
+          <input id="quick-search" type="text" placeholder="이름/내선/MBTI 키워드" style="flex:1;">
+          <button class="btn" type="button" onclick="goEmployeeList()">검색</button>
+        </div>
+        <p style="margin-top:.5rem; color:var(--color-grey); font-size:.9rem;">
+          상단 전역 검색창(헤더)도 사용 가능합니다.
+        </p>
+      </div>
+    </div>
+
+    <!-- 4) DB 상태 -->
+    <div class="card">
+      <div class="card-header">DB 상태</div>
+      <div class="card-body">
+        <ul>
+          <li>최종 수정일시: <strong>{{ db_last_modified or '-' }}</strong></li>
+          <li>직원 수: <strong>{{ employee_count or '-' }}</strong></li>
+          <li>면담 기록 수: <strong>{{ interview_count or '-' }}</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 5) 공지 & 일정 -->
+    <div class="card">
+      <div class="card-header">공지 & 일정</div>
+      <div class="card-body">
+        {% if notices %}
+          <ul>
+            {% for n in notices %}
+              <li style="margin:.25rem 0;">
+                <strong>{{ n.title }}</strong>
+                <span style="color:var(--color-grey);"> — {{ n.date }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p style="color:var(--color-grey);">등록된 공지가 없습니다.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- 6) 바로가기 -->
+    <div class="card">
+      <div class="card-header">바로가기</div>
+      <div class="card-body" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap:.5rem;">
+        <a class="btn secondary" href="{{ url_for('employee_list') }}">직원 목록</a>
+        <a class="btn secondary" href="{{ url_for('interview_records') }}">근태정보</a>
+        <a class="btn secondary" href="{{ url_for('profile') }}">면담기록</a>
+        <a class="btn secondary" href="#" onclick="window.scrollTo({top:0, behavior:'smooth'})">맨 위로</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 로딩 오버레이: 기존 스타일 그대로 사용 -->
+  <div id="loading" class="loading-overlay" aria-hidden="true">
+    <div class="spinner" role="status" aria-label="로딩 중"></div>
   </div>
+
+  <style>
+    .dashboard-grid { display:grid; grid-template-columns: repeat(12, 1fr); gap:1rem; }
+    .dashboard-grid > .card:nth-child(1) { grid-column: span 6; }
+    .dashboard-grid > .card:nth-child(2) { grid-column: span 6; }
+    .dashboard-grid > .card:nth-child(3) { grid-column: span 4; }
+    .dashboard-grid > .card:nth-child(4) { grid-column: span 4; }
+    .dashboard-grid > .card:nth-child(5) { grid-column: span 4; }
+    .dashboard-grid > .card:nth-child(6) { grid-column: span 12; }
+    @media (max-width: 992px) { .dashboard-grid > .card { grid-column: span 12; } }
+  </style>
+
+  <script>
+    function goEmployeeList(){
+      var q = document.getElementById('quick-search').value.trim();
+      if(!q){ window.location.href = "{{ url_for('employee_list') }}"; return; }
+      var url = new URL("{{ url_for('employee_list') }}", window.location.origin);
+      url.searchParams.set('q', q);
+      window.location.href = url.toString();
+    }
+  </script>
 {% endblock %}

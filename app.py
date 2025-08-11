@@ -1,7 +1,8 @@
+import re
 import os
+from datetime import datetime
 from datetime import timedelta
 from threading import Lock
-
 import pandas as pd
 from flask import (
     Flask, render_template, request, redirect,
@@ -66,6 +67,15 @@ def check_ip_whitelist():
 @app.route("/ip_block")
 def ip_block():
     return render_template("ip_block.html"), 403
+# ip block시 접속자 ip 확인
+from flask import request, render_template
+# (프록시 환경이면 ProxyFix 적용)
+
+@app.route("/ip_block")
+def ip_block():
+    client_ip = request.remote_addr  # ProxyFix 적용 시 실제 클라이언트 IP
+    return render_template("ip_block.html", client_ip=client_ip)
+
 
 # ---------- Flask-Login 설정 ----------
 login_manager = LoginManager(app)
@@ -176,17 +186,145 @@ def employee_detail(name):
     if name not in df['name'].values:
         abort(404, description="해당 직원을 찾을 수 없습니다.")
 
+    DATE_FIELDS_IN_FORM = {"birthdate", "hire_date", "exit_date"}
+
+    def to_iso_date(val: str) -> str:
+        """
+        다양한 형태의 날짜(YYYY-MM-DD HH:MM:SS, YYYYMMDD, YYMMDD, 250811, 2025.08.11 등)를
+        input[type=date]에서 먹는 YYYY-MM-DD로 변환.
+        """
+        if val is None:
+            return ""
+        s = str(val).strip()
+        if s == "" or s.lower() == "nan":
+            return ""
+
+        # 소수점 .0 제거
+        if re.fullmatch(r"\d+\.0", s):
+            s = s[:-2]
+
+        # 구분자 통일
+        s = s.replace(".", "-").replace("/", "-")
+
+        # 8자리 숫자(YYYYMMDD)
+        if re.fullmatch(r"\d{8}", s):
+            y, m, d = int(s[:4]), int(s[4:6]), int(s[6:8])
+            try:
+                return datetime(y, m, d).strftime("%Y-%m-%d")
+            except ValueError:
+                return ""
+
+        # 6자리 숫자(YYMMDD) → 2000~2069은 2000대, 그 외 1900대
+        if re.fullmatch(r"\d{6}", s):
+            yy, mm, dd = int(s[:2]), int(s[2:4]), int(s[4:6])
+            year = 2000 + yy if yy <= 69 else 1900 + yy
+            try:
+                return datetime(year, mm, dd).strftime("%Y-%m-%d")
+            except ValueError:
+                return ""
+
+        # 'YYYY-MM-DD' [HH:MM:SS] 형태
+        m = re.match(r"^(\d{4})-(\d{1,2})-(\d{1,2})", s)
+        if m:
+            try:
+                return datetime(int(m.group(1)), int(m.group(2)), int(m.group(3))).strftime("%Y-%m-%d")
+            except ValueError:
+                return ""
+
+        # 마지막 보루: pandas 파서
+        try:
+            d = pd.to_datetime(s, errors="coerce")
+            if pd.isna(d):
+                return ""
+            return d.strftime("%Y-%m-%d")
+        except Exception:
+            return ""
+
+    def normalize_salary(val: str) -> str:
+        """
+        연봉 표기를 원 단위 정수 문자열로 정규화.
+        허용 입력 예: '3000만원', '30,000,000', '3000', '30,000천원' 등
+        규칙:
+          - '만'/'만원'이 포함되면 숫자 * 10,000
+          - 숫자만 있고 자릿수가 짧으면(예: 3000) 만원 단위로 추정해 * 10,000
+          - 그 외는 원 단위로 간주
+        """
+        if val is None:
+            return ""
+        s = str(val).strip()
+        if s == "" or s.lower() == "nan":
+            return ""
+
+        # 공백/콤마 제거, 숫자 추출
+        raw = s.replace(",", "").replace(" ", "")
+        m = re.search(r"(\d+(?:\.\d+)?)", raw)
+        if not m:
+            return ""
+
+        num = float(m.group(1))
+        has_man = ("만" in raw)
+
+        # '만' 단위 표기면 곱하기 10,000
+        if has_man:
+            amount = int(round(num * 10000))
+            return str(amount)
+
+        # '원'이 명시되었거나 충분히 큰 수면 원 단위로 본다
+        if "원" in raw or num >= 100000:
+            return str(int(round(num)))
+
+        # 자릿수로 KRW/만원 추정: 5자리 이상은 KRW로 본다
+        if len(str(int(num))) >= 5:
+            return str(int(round(num)))
+
+        # 그 외는 만원 단위로 해석
+        amount = int(round(num * 10000))
+        return str(amount)
+
     if request.method == "POST":
-        for col in df.columns:
-            if col in request.form:
-                df.loc[df['name'] == name, col] = request.form[col]
+        mask = df['name'] == name
+
+        for form_key in request.form:
+            if form_key == "name":  # 이름은 읽기전용
+                continue
+
+            value = request.form.get(form_key, "").strip()
+
+            # 날짜 필드는 ISO(YYYY-MM-DD)로 통일 저장
+            if form_key in DATE_FIELDS_IN_FORM:
+                value = to_iso_date(value)
+
+            # 연봉 정규화: 어떤 표기든 원 단위 정수로 저장
+            if form_key == "salary":
+                value = normalize_salary(value)
+
+            if form_key in df.columns:
+                df.loc[mask, form_key] = value
+
         with EXCEL_LOCK:
             df.to_excel(EXCEL_PATH, index=False, engine="openpyxl")
         flash("수정사항이 저장되었습니다.", "success")
         return redirect(url_for("employee_detail", name=name))
 
-    emp_data = df.loc[df['name'] == name].iloc[0].to_dict()
-    return render_template("employee_detail.html", employee=emp_data)
+    # GET: 화면 표시용 가공
+    row = df.loc[df['name'] == name].iloc[0].to_dict()
+
+    # 문자열화 & extension_number 끝의 '.0' 제거
+    for k, v in list(row.items()):
+        v = "" if pd.isna(v) else str(v)
+        if k == "extension_number":
+            v = re.sub(r"\.0$", "", v)
+        row[k] = v
+
+    # 날짜 필드 ISO 형식
+    row['birthdate'] = to_iso_date(row.get('birthdate', ''))
+    row['hire_date'] = to_iso_date(row.get('hire_date', ''))
+    row['exit_date'] = to_iso_date(row.get('exit_date', ''))
+
+    # 연봉은 number input이 읽을 수 있도록 숫자만 내려주기
+    row['salary'] = normalize_salary(row.get('salary', ''))
+
+    return render_template("employee_detail.html", employee=row)
 
 # ---------- 직원 검색 ----------
 @app.route("/employee_search")

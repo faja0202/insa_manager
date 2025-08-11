@@ -1,0 +1,11 @@
+{
+  "files.watcherExclude": {
+    "**/*.xlsx": true
+  },
+  "search.exclude": {
+    "**/*.xlsx": true
+  },
+  "files.exclude": {
+    "**/*.xlsx": true
+  }
+}

@@ -503,7 +503,6 @@ body.login-page #global-flash {
   .emp-row { flex: 1 1 100%; }
 }
 /* 직원 상세 정보 페이지 추가 스타일 */
-/* 기존 style.css에 추가하거나 별도 파일로 import */
 
 /* 직원 상세 페이지 특화 스타일 */
 .employee-detail {
@@ -658,3 +657,18 @@ body.login-page #global-flash {
         justify-content: center;
     }
 }
+/* 직원 상세 - 길어질 수 있는 textarea UX 강화 */
+.profile-item textarea {
+  min-height: 3rem;
+  resize: vertical;       /* 사용자가 직접 늘릴 수도 있게 */
+  white-space: pre-wrap;  /* \n을 시각적으로 유지 */
+  line-height: 1.4;
+}
+
+/* 자동 높이 증가 동작 시 스크롤바 숨김 */
+textarea.auto-grow {
+  overflow: hidden;
+}
+/* 탭 섹션 표시/숨김 */
+.profile-section { display: none; }
+.profile-section.active { display: block; }
