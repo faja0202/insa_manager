@@ -64,18 +64,12 @@ def check_ip_whitelist():
         return redirect(url_for("ip_block"))
 
 # ---------- 차단 페이지 ----------
-@app.route("/ip_block")
-def ip_block():
-    return render_template("ip_block.html"), 403
-# ip block시 접속자 ip 확인
 from flask import request, render_template
-# (프록시 환경이면 ProxyFix 적용)
 
 @app.route("/ip_block")
 def ip_block():
-    client_ip = request.remote_addr  # ProxyFix 적용 시 실제 클라이언트 IP
-    return render_template("ip_block.html", client_ip=client_ip)
-
+    client_ip = request.remote_addr  # ProxyFix 적용 시 실제 클라이언트 IP로 보정됨
+    return render_template("ip_block.html", client_ip=client_ip), 403
 
 # ---------- Flask-Login 설정 ----------
 login_manager = LoginManager(app)
