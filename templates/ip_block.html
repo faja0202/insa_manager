@@ -1,3 +1,6 @@
+{# templates/ip_block.html
+   - 로그인 링크가 실제 작동하도록 app.before_request 예외에 login 추가됨
+   - 안내 문구/주석 보강 #}
 {% extends 'base.html' %}
 {% block title %}접근 불가{% endblock %}
 
@@ -14,6 +17,7 @@
       </p>
       <div style="display:flex; gap:.5rem; justify-content:center; flex-wrap:wrap;">
         <a href="{{ url_for('main') }}" class="btn secondary">홈으로</a>
+        <!-- (중요) 이제 로그인은 예외 엔드포인트로 허용됨 -->
         <a href="{{ url_for('login') }}" class="btn">로그인 화면으로 돌아가기</a>
       </div>
     </div>

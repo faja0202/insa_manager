@@ -1,3 +1,7 @@
+{# templates/employee_list.html
+   - 서버사이드 검색(q)와 입력 값 동기화
+   - 카드(행) 키보드 접근성 강화(tabindex/role)
+   - 코드 설명 주석 추가 #}
 {% extends 'base.html' %}
 {% block title %}직원 목록{% endblock %}
 
@@ -6,13 +10,15 @@
   <div class="card">
     <h2 class="card-title">직원 목록</h2>
 
-    <!-- 검색 입력 -->
+    <!-- 검색 입력: 서버 q 파라미터와 동기화 -->
     <div class="search-wrapper">
       <input
         type="text"
         id="emp-search"
         placeholder="이름/내선/MBTI로 검색..."
-        onkeyup="filterTable()"
+        value="{{ query or '' }}"
+        oninput="filterTable()"
+        aria-label="직원 검색 입력"
       />
     </div>
 
@@ -22,11 +28,15 @@
       {% if group %}
         <h3 class="team-heading">&lt;{{ team }}&gt;</h3>
         <div class="table-responsive">
-          <table class="emp-table">
+          <table class="emp-table" aria-label="{{ team }} 소속 직원">
             <tbody>
               {% for emp in group %}
                 <tr class="emp-row"
-                    onclick="location.href='{{ url_for('employee_detail', name=emp.name) }}'">
+                    role="button"
+                    tabindex="0"
+                    aria-label="{{ emp.name }} 상세 보기"
+                    onclick="location.href='{{ url_for('employee_detail', name=emp.name) }}'"
+                    onkeydown="if(event.key==='Enter' || event.key===' ') this.click();">
                   <td>{{ emp.name }}</td>
                   <td>{{ emp.team_name }}</td>
                   <td>{{ emp.position }}</td>
@@ -44,13 +54,17 @@
     {% for team in other_teams %}
       <h3 class="team-heading">&lt;{{ team }}&gt;</h3>
       <div class="table-responsive">
-        <table class="emp-table">
+        <table class="emp-table" aria-label="{{ team }} 소속 직원">
           <tbody>
             {% for emp in employees
                   | selectattr('team_name','equalto',team)
                   | list %}
               <tr class="emp-row"
-                  onclick="location.href='{{ url_for('employee_detail', name=emp.name) }}'">
+                  role="button"
+                  tabindex="0"
+                  aria-label="{{ emp.name }} 상세 보기"
+                  onclick="location.href='{{ url_for('employee_detail', name=emp.name) }}'"
+                  onkeydown="if(event.key==='Enter' || event.key===' ') this.click();">
                 <td>{{ emp.name }}</td>
                 <td>{{ emp.team_name }}</td>
                 <td>{{ emp.position }}</td>
@@ -67,6 +81,11 @@
 </div>
 
 <script>
+/**
+ * 클라이언트 사이드 필터
+ * - 서버에서 내려온 employees 중에서도 추가 필터링 가능
+ * - 입력 값은 서버 q와 동기화되어 있음
+ */
 function filterTable() {
   const filter = document.getElementById('emp-search').value.toLowerCase();
   document.querySelectorAll('.emp-row').forEach(row => {
@@ -74,5 +93,8 @@ function filterTable() {
     row.style.display = texts.some(t => t.includes(filter)) ? '' : 'none';
   });
 }
+
+// 초기 로드 시 서버 q 값을 반영해 한번 필터 수행
+document.addEventListener('DOMContentLoaded', filterTable);
 </script>
 {% endblock %}

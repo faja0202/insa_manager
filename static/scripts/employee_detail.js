@@ -1,4 +1,10 @@
 // static/scripts/employee_detail.js
+// ───────────────────────────────────────────────────────────
+// 변경 요약
+// - 탭 선택자를 '.tab[role="tab"]' 로 제한(이력서 아이콘 제외)
+// - 섹션 토글 시 hidden 속성까지 동기화 (접근성/표시 모두 일치)
+// - 초기에 모든 입력을 disabled 처리(이름 readonly 제외)
+// ───────────────────────────────────────────────────────────
 (function () {
   'use strict';
 
@@ -6,7 +12,7 @@
     const form = document.getElementById('detail-form');
     if (!form) return;
 
-    // 유틸
+    // ===== 유틸 =====
     function normalizeCommaNewlines(el) {
       let v = (el.value || '').replace(/\r\n/g, '\n');
       v = v.replace(/,\s*(?!\n)/g, ',\n').trim();   // 콤마 뒤 줄바꿈
@@ -18,51 +24,64 @@
       el.style.overflow = 'hidden';
       el.style.height = (el.scrollHeight + 2) + 'px';
     }
-    // ★ 특정 섹션 안의 auto-grow만 리사이즈
     function resizeTextareasIn(sectionEl) {
       if (!sectionEl) return;
       const areas = sectionEl.querySelectorAll('textarea.auto-grow');
       areas.forEach((el) => autoResize(el));
     }
 
-    // 1) 탭 전환
-    const tabs = document.querySelectorAll('.tab');
+    // ===== 탭 전환 =====
+    // PDF 아이콘은 role="button" 이라 제외됨
+    const tabs = document.querySelectorAll('.tab[role="tab"]');
     const sections = document.querySelectorAll('.profile-section');
 
+    function activateTab(tab) {
+      const targetId = tab.dataset.target;
+
+      tabs.forEach((t) => {
+        const active = t === tab;
+        t.classList.toggle('active', active);
+        t.setAttribute('aria-selected', String(active));
+      });
+
+      sections.forEach((section) => {
+        const active = section.id === targetId;
+        section.classList.toggle('active', active);
+        section.hidden = !active; // hidden 속성까지 동기화 ★
+      });
+
+      const targetSection = document.getElementById(targetId);
+      requestAnimationFrame(() => resizeTextareasIn(targetSection));
+    }
+
     tabs.forEach((tab) => {
-      tab.addEventListener('click', () => {
-        const targetId = tab.dataset.target;
-
-        tabs.forEach((t) => t.classList.remove('active'));
-        tab.classList.add('active');
-
-        sections.forEach((section) => {
-          section.classList.toggle('active', section.id === targetId);
-        });
-
-        // ★ 탭이 바뀐 다음 프레임에서 대상 섹션 리사이즈
-        const targetSection = document.getElementById(targetId);
-        requestAnimationFrame(() => resizeTextareasIn(targetSection));
+      tab.addEventListener('click', () => activateTab(tab));
+      tab.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+          e.preventDefault();
+          const dir = e.key === 'ArrowRight' ? 1 : -1;
+          const arr = Array.from(tabs);
+          const idx = arr.indexOf(tab);
+          const next = arr[(idx + dir + arr.length) % arr.length];
+          next.focus();
+          activateTab(next);
+        }
       });
     });
 
-    // 2) 콤마→줄바꿈 + 자동 높이
+    // 초기 탭 섹션 상태 보정(HTML에 hidden이 있을 수 있음)
+    const initialActive = document.querySelector('.profile-section.active') || document.getElementById('basic-info');
+    sections.forEach(sec => sec.hidden = !sec.classList.contains('active'));
+    requestAnimationFrame(() => resizeTextareasIn(initialActive));
+
+    // ===== 콤마→줄바꿈 + 자동 높이 =====
     const listAreas = form.querySelectorAll('textarea.auto-list');
     const growAreas = form.querySelectorAll('textarea.auto-grow');
 
-    // 초기 정규화/리사이즈
     listAreas.forEach((el) => normalizeCommaNewlines(el));
-    // 활성 섹션만 먼저 리사이즈 (숨김 섹션은 scrollHeight=0일 수 있음)
-    const initialActive = document.querySelector('.profile-section.active');
-    if (initialActive) {
-      requestAnimationFrame(() => resizeTextareasIn(initialActive));
-    }
-
-    // 입력 중엔 높이만 반영
     growAreas.forEach((el) => {
       el.addEventListener('input', () => autoResize(el));
     });
-    // 붙여넣기/포커스아웃 시 정규화 + 리사이즈
     listAreas.forEach((el) => {
       el.addEventListener('paste', () => {
         setTimeout(() => { normalizeCommaNewlines(el); autoResize(el); }, 0);
@@ -73,13 +92,17 @@
       });
     });
 
-    // 3) 폼 편집/저장 토글 + 로딩
+    // ===== 폼 편집/저장 토글 + 로딩 =====
     const inputs = form.querySelectorAll('input:not([readonly]), select, textarea');
     const editBtn = document.getElementById('edit-btn');
     const saveBtn = document.getElementById('save-btn');
     const loading = document.getElementById('loading');
 
+    // 초기에 읽기 전용(비활성)
     inputs.forEach((el) => (el.disabled = true));
+
+    let dirty = false;
+    form.addEventListener('input', () => { if (!dirty) dirty = true; });
 
     if (editBtn) {
       editBtn.addEventListener('click', () => {
@@ -88,10 +111,10 @@
         if (isDisabled) {
           editBtn.textContent = '취소';
           if (saveBtn) saveBtn.style.display = 'inline-block';
-          // 편집 모드 진입 시 현재 보이는 섹션만 리사이즈
           const visible = document.querySelector('.profile-section.active');
           requestAnimationFrame(() => resizeTextareasIn(visible));
         } else {
+          dirty = false;
           editBtn.textContent = '수정';
           if (saveBtn) saveBtn.style.display = 'none';
         }
@@ -103,8 +126,16 @@
         e.preventDefault();
         listAreas.forEach((el) => normalizeCommaNewlines(el));
         if (loading) loading.classList.add('active');
-        setTimeout(() => form.submit(), 300);
+        form.requestSubmit ? form.requestSubmit() : form.submit();
       });
     }
+
+    // (옵션) 편집 중 이탈 경고
+    window.addEventListener('beforeunload', (e) => {
+      if (dirty) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
   });
 })();

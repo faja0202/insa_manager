@@ -6,7 +6,7 @@
     <!-- 플래시 메시지 영역 -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
-        <ul id="messages">
+        <ul id="messages" aria-live="polite">
           {% for category, message in messages %}
             <li class="{{ category }}">{{ message }}</li>
           {% endfor %}
@@ -14,26 +14,52 @@
       {% endif %}
     {% endwith %}
 
-    <div class="tabs">
-      <div class="tab active" data-target="basic-info">기본 정보</div>
-      <div class="tab" data-target="extended-info">상세 정보</div>
+    <!-- 상단 탭: 기본/상세 + PDF 아이콘 -->
+    <div class="tabs" role="tablist" aria-label="프로필 섹션 전환">
+      <!-- 실제 탭은 role="tab" 을 가짐 -->
+      <div class="tab active" data-target="basic-info" role="tab" aria-selected="true" aria-controls="basic-info">기본 정보</div>
+      <div class="tab" data-target="extended-info" role="tab" aria-selected="false" aria-controls="extended-info">상세 정보</div>
+
+      <!-- PDF 아이콘은 탭이 아님: role="button" -->
+      <div class="tab"
+           title="이력서 보기"
+           onclick="window.open('{{ url_for('resume_view', name=employee.name) }}','_blank')"
+           style="margin-left:auto; display:flex; align-items:center; gap:.35rem;"
+           role="button" tabindex="0"
+           onkeydown="if(event.key==='Enter' || event.key===' ') this.click();">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+             aria-hidden="true">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <path d="M14 2v6h6"/>
+          <text x="7" y="16" font-size="7" font-family="monospace">PDF</text>
+        </svg>
+        <span>이력서</span>
+      </div>
     </div>
 
     <div class="form-actions">
+      <!-- '수정' 버튼: 모든 입력 enable/disable 토글 -->
       <button type="button" id="edit-btn" class="btn">수정</button>
+      <!-- '저장' 버튼: 폼 제출 -->
       <button type="submit" id="save-btn" form="detail-form" class="btn" style="display: none;">저장</button>
     </div>
 
-    <form id="detail-form" method="POST" action="{{ url_for('employee_detail', name=employee.name if employee else '') }}">
+    <form id="detail-form" method="POST"
+          action="{{ url_for('employee_detail', name=employee.name) }}"
+          autocomplete="off">
+
       <!-- 기본 정보 섹션 -->
-      <section id="basic-info" class="profile-section active">
+      <section id="basic-info" class="profile-section active" role="tabpanel" aria-labelledby="basic-tab">
         <h2 class="section-title">기본 정보</h2>
         <div class="profile-header">
           <div class="profile-photo">
-            <img src="{{ url_for('static', filename='uploads/photo/' ~ (employee.name if employee else 'default') ~ '.png') }}"
-                 alt="프로필 사진"
-                 onerror="this.src='{{ url_for('static', filename='images/default-profile.png') }}'">
+            <img src="{{ url_for('photo_view', name=employee.name if employee else 'default') }}"
+                alt="프로필 사진"
+                onerror="this.src='{{ url_for('photo_view', name='default') }}'">
           </div>
+
           <div class="profile-summary">
             <div class="profile-item">
               <label>이름</label>
@@ -49,7 +75,7 @@
             </div>
             <div class="profile-item">
               <label>내선번호</label>
-              <input type="text" name="extension_number" value="{{ employee.extension_number if employee else '' }}">
+              <input type="text" name="extension_number" inputmode="numeric" pattern="[0-9\-]*" value="{{ employee.extension_number if employee else '' }}">
             </div>
           </div>
         </div>
@@ -65,11 +91,11 @@
           </div>
           <div class="profile-item">
             <label>연락처</label>
-            <input type="text" name="phone_number" value="{{ employee.phone_number if employee else '' }}">
+            <input type="text" name="phone_number" inputmode="tel" pattern="[0-9\-+ ]*" value="{{ employee.phone_number if employee else '' }}">
           </div>
           <div class="profile-item">
             <label>비상연락처</label>
-            <input type="text" name="emergency_contact" value="{{ employee.emergency_contact if employee and employee.emergency_contact else '' }}">
+            <input type="text" name="emergency_contact" inputmode="tel" pattern="[0-9\-+ ]*" value="{{ employee.emergency_contact if employee and employee.emergency_contact else '' }}">
           </div>
           <div class="profile-item">
             <label>MBTI 유형</label>
@@ -88,7 +114,6 @@
             </div>
           </div>
 
-          <!-- input → textarea + auto-list auto-grow -->
           <div class="profile-item">
             <label>내부 교육</label>
             <textarea name="internal_training" rows="2" class="auto-list auto-grow">{{ employee.internal_training if employee and employee.internal_training else '' }}</textarea>
@@ -96,7 +121,7 @@
 
           <div class="profile-item">
             <label>이메일</label>
-            <input type="email" name="email" value="{{ employee.email if employee and employee.email else '' }}">
+            <input type="email" name="email" value="{{ employee.email if employee and employee.email else '' }}" autocapitalize="none" autocorrect="off" spellcheck="false">
           </div>
           <div class="profile-item">
             <label>입사일</label>
@@ -113,14 +138,14 @@
         </div>
       </section>
 
-      <!-- 상세 정보 섹션 -->
-      <section id="extended-info" class="profile-section">
+      <!-- 상세 정보 섹션 (hidden 속성 제거; JS가 hidden을 제어) -->
+      <section id="extended-info" class="profile-section" role="tabpanel" aria-labelledby="extended-tab">
         <h2 class="section-title">상세 정보</h2>
         <div class="profile-header">
           <div class="profile-photo">
-            <img src="{{ url_for('static', filename='uploads/photo/' ~ (employee.name if employee else 'default') ~ '.png') }}"
-                 alt="추가 사진"
-                 onerror="this.src='{{ url_for('static', filename='images/default-profile.png') }}'">
+            <img src="{{ url_for('photo_view', name=employee.name if employee else 'default') }}"
+                alt="프로필 사진"
+                onerror="this.src='{{ url_for('photo_view', name='default') }}'">
           </div>
           <div class="profile-summary">
             <div class="profile-item">
@@ -154,7 +179,8 @@
 
           <div class="profile-item">
             <label>연봉</label>
-            <input type="number" name="salary" value="{{ employee.salary if employee and employee.salary else '' }}">
+            <input type="number" name="salary" inputmode="numeric" step="1" min="0"
+                   value="{{ employee.salary if employee and employee.salary else '' }}">
           </div>
 
           <div class="profile-item">
@@ -180,11 +206,11 @@
   </div>
 
   <!-- 로딩 오버레이 -->
-  <div class="loading-overlay" id="loading">
-    <div class="spinner"></div>
+  <div class="loading-overlay" id="loading" aria-hidden="true">
+    <div class="spinner" role="status" aria-label="로딩 중"></div>
   </div>
 </div>
 
 <!-- 페이지 하단에서 스크립트 로드 (이 페이지 전용) -->
-<script src="{{ url_for('static', filename='scripts/employee_detail.js') }}"></script>
+<script src="{{ url_for('static', filename='scripts/employee_detail.js') }}" defer></script>
 {% endblock %}

@@ -1,6 +1,15 @@
-/* static/style.css */
+/* style.css
+   ─────────────────────────────────────────────────────────
+   디자인 가이드:
+   - 메인 컬러: 블루 계열
+   - 카드/입력/탭/그리드 컴포넌트 일관 스타일
+   - 접근성: 포커스, 대비, 애니메이션 최소화
+   정리 사항:
+   - #messages 관련 규칙 중복 정의 → 하나로 통합
+   - 상세 페이지 레이아웃 주석 보강
+   ───────────────────────────────────────────────────────── */
 
-/* — Color Variables — */
+/* — 주 사용 컬러 메인은 블루 기반 — */
 :root {
   --color-primary: #007BFF;
   --color-primary-dark: #0056b3;
@@ -16,659 +25,210 @@
 }
 
 /* — Reset & Base Styles — */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: 'Segoe UI', Tahoma, sans-serif;
   background: var(--color-background);
   color: #333;
   line-height: 1.5;
 }
-a {
-  text-decoration: none;
-  color: inherit;
-}
+a { text-decoration: none; color: inherit; }
 
 /* — Header & Navigation — */
 header {
   background: var(--color-primary);
   color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 1.5rem;
-  height: 60px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 1.5rem; height: 60px;
 }
-.logo {
-  font-size: 1.25rem;
-  font-weight: bold;
-}
-
-.logo-box {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  height: 100%;
-}
-
-.logo-box img {
-  height: 40px; /* 적절한 높이로 제한 */
-  width: auto;
-  object-fit: contain;
-}
-
-nav {
-  display: flex;
-  gap: 1.5rem;
-}
+.logo { font-size: 1.25rem; font-weight: bold; }
+.logo-box { display: flex; align-items: center; gap: 0.75rem; height: 100%; }
+.logo-box img { height: 40px; width: auto; object-fit: contain; }
+nav { display: flex; gap: 1.5rem; }
 nav a {
-  color: #fff;
-  font-weight: 500;
-  padding: 0.5rem;
-  position: relative;
+  color: #fff; font-weight: 500; padding: 0.5rem; position: relative;
   transition: color var(--transition-speed);
 }
-nav a:hover,
-nav a.active {
-  color: var(--color-background);
-}
+nav a:hover, nav a.active { color: var(--color-background); }
 nav a.active::after {
-  content: '';
-  position: absolute;
-  bottom: -4px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 50%;
-  height: 3px;
-  background: #fff;
-  border-radius: 2px;
+  content: ''; position: absolute; bottom: -4px; left: 50%;
+  transform: translateX(-50%); width: 50%; height: 3px; background: #fff; border-radius: 2px;
 }
 
 /* — Main Container — */
-.container {
-  max-width: 1200px;
-  margin: 2rem auto;
-  padding: 0 1rem;
-}
+.container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
 
 /* — Tabs — */
 .tabs {
-  display: flex;
-  border-bottom: 2px solid var(--color-accent-light);
-  margin-bottom: 1.5rem;
+  display: flex; border-bottom: 2px solid var(--color-accent-light); margin-bottom: 1.5rem;
 }
 .tab {
-  padding: 0.75rem 1.5rem;
-  cursor: pointer;
-  font-weight: 500;
-  color: var(--color-primary);
+  padding: 0.75rem 1.5rem; cursor: pointer; font-weight: 500; color: var(--color-primary);
   transition: background var(--transition-speed), color var(--transition-speed);
 }
-.tab:not(.active):hover {
-  background: var(--color-accent-light);
-}
+.tab:not(.active):hover { background: var(--color-accent-light); }
 .tab.active {
   border-bottom: 3px solid var(--color-primary);
-  background: var(--color-accent-light);
-  color: var(--color-primary-dark);
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
+  background: var(--color-accent-light); color: var(--color-primary-dark);
+  border-top-left-radius: 4px; border-top-right-radius: 4px;
 }
+.tabs .tab svg { cursor: pointer; transition: transform 0.2s; }
+.tabs .tab svg:hover { transform: scale(1.1); }
 
 /* — Profile Section Wrapper — */
 .profile-section {
-  margin-top: 2rem;
-  padding: 1.5rem;
-  background: var(--color-neutral-light);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
+  margin-top: 2rem; padding: 1.5rem;
+  background: var(--color-neutral-light); border: 1px solid var(--color-border); border-radius: 8px;
 }
 .section-title {
-  font-size: 1.5rem;
-  color: var(--color-primary);
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid var(--color-accent-light);
+  font-size: 1.5rem; color: var(--color-primary); margin-bottom: 1rem;
+  padding-bottom: 0.5rem; border-bottom: 2px solid var(--color-accent-light);
 }
 
 /* — Profile Grid Layout — */
 .profile-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1.5rem;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem;
 }
 
 /* — Profile Item — */
-.profile-item {
-  display: flex;
-  flex-direction: column;
-}
-.profile-item label {
-  font-size: 0.85rem;
-  color: var(--color-grey);
-  margin-bottom: 0.25rem;
-}
-.profile-item input,
-.profile-item textarea,
-.profile-item select {
-  width: 100%;
-  padding: 0.5rem;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background: #fff;
+.profile-item { display: flex; flex-direction: column; }
+.profile-item label { font-size: 0.85rem; color: var(--color-grey); margin-bottom: 0.25rem; }
+.profile-item input, .profile-item textarea, .profile-item select {
+  width: 100%; padding: 0.5rem; font-size: 1rem;
+  border: 1px solid #ccc; border-radius: 4px; background: #fff;
   transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
 }
-.profile-item input:focus,
-.profile-item textarea:focus,
-.profile-item select:focus {
-  outline: none;
-  border-color: var(--color-primary);
+.profile-item input:focus, .profile-item textarea:focus, .profile-item select:focus {
+  outline: none; border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(0,123,255,0.15);
 }
-.profile-item .value {
-  font-weight: 500;
-  color: #222;
-}
+.profile-item .value { font-weight: 500; color: #222; }
 
 /* — Profile Photo — */
-.profile-photo {
-  grid-column: span 2;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+.profile-photo { grid-column: span 2; display: flex; justify-content: center; align-items: center; }
 .profile-photo img {
-  width: 140px;
-  height: 140px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid #fff;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  width: 140px; height: 140px; border-radius: 50%; object-fit: cover;
+  border: 3px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 /* — Buttons — */
 .btn {
-  display: inline-block;
-  background: var(--color-primary);
-  color: #fff;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 4px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background var(--transition-speed);
+  display: inline-block; background: var(--color-primary); color: #fff;
+  border: none; padding: 0.6rem 1.2rem; border-radius: 4px;
+  font-weight: bold; cursor: pointer; transition: background var(--transition-speed);
 }
-.btn:hover {
-  background: var(--color-primary-dark);
-}
-.btn.secondary {
-  background: var(--color-neutral-lighter);
-  color: #333;
-}
-.btn.secondary:hover {
-  background: #e0e0e0;
-}
-.btn.danger {
-  background: var(--color-danger);
-}
-.btn.danger:hover {
-  background: var(--color-danger-dark);
-}
+.btn:hover { background: var(--color-primary-dark); }
+.btn.secondary { background: var(--color-neutral-lighter); color: #333; }
+.btn.secondary:hover { background: #e0e0e0; }
+.btn.danger { background: var(--color-danger); }
+.btn.danger:hover { background: var(--color-danger-dark); }
 
 /* — Form Helpers — */
-label.required::after {
-  content: " *";
-  color: var(--color-danger);
+label.required::after { content: " *"; color: var(--color-danger); }
+input[disabled], textarea[disabled], select[disabled], input[readonly] {
+  background: var(--color-neutral-lighter); color: #999; cursor: not-allowed;
 }
-input[disabled],
-textarea[disabled],
-select[disabled],
-input[readonly] {
-  background: var(--color-neutral-lighter);
-  color: #999;
-  cursor: not-allowed;
-}
-.form-error {
-  color: var(--color-danger);
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
-}
+.form-error { color: var(--color-danger); font-size: 0.875rem; margin-top: 0.25rem; }
 
-/* — Flash Messages — */
-#messages {
-  list-style: none;
-  padding: 0;
-  margin-bottom: 1rem;
-}
-#messages li {
-  padding: 0.5rem;
-  border-radius: 4px;
-  margin-bottom: 0.5rem;
-}
-#messages li.success {
-  background: #E6FFED;
-  color: #22863A;
-}
-#messages li.danger {
-  background: #FFEEF0;
-  color: #CB2431;
-}
+/* — Flash Messages (중복 제거/통합) — */
+#messages { list-style: none; padding: 0; margin-bottom: 1rem; }
+#messages li { padding: 0.75rem 1rem; border-radius: 4px; margin-bottom: 0.5rem; font-size: 0.95rem; }
+#messages li.success { background: #e6ffed; color: #22863a; border: 1px solid #b2f5c0; }
+#messages li.danger  { background: #ffeef0; color: #cb2431; border: 1px solid #f5c2c7; }
+#messages li.warning { background: #fff4e5; color: #b26a00; border: 1px solid #ffcc80; }
 
 /* — Loading Overlay — */
 .loading-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(255,255,255,0.6);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
+  position: fixed; inset: 0; background: rgba(255,255,255,0.6);
+  display: none; justify-content: center; align-items: center; z-index: 999;
 }
-.loading-overlay.active {
-  display: flex;
-}
+.loading-overlay.active { display: flex; }
 .spinner {
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid var(--color-primary);
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  animation: spin 0.8s linear infinite;
+  border: 4px solid #f3f3f3; border-top: 4px solid var(--color-primary);
+  border-radius: 50%; width: 36px; height: 36px; animation: spin 0.8s linear infinite;
 }
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-/* — Responsive — */
-@media (max-width: 768px) {
-  .profile-grid {
-    grid-template-columns: 1fr;
-  }
-  .profile-photo {
-    grid-column: 1 / -1;
-  }
-}
+/* — Card — */
 .card {
-  background: #fff;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-  margin-bottom: 2rem;
-  overflow: visible;
+  background: #fff; padding: 1.5rem; border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06); margin-bottom: 2rem; overflow: visible;
 }
-/* — Login Card — */
-.login-card {
-  max-width: 400px;
-  margin: 4rem auto;
-}
-.card-header {
-  font-size: 1.5rem;
-  color: var(--color-primary);
-  margin-bottom: 1rem;
-  border-bottom: 1px solid var(--color-border);
-  padding-bottom: 0.5rem;
-}
-.card-body {
-  margin-top: 1rem;
-}
+.login-card { max-width: 400px; margin: 4rem auto; }
+.card-header { font-size: 1.5rem; color: var(--color-primary); margin-bottom: 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; }
+.card-body { margin-top: 1rem; }
 
-/*로그인 관련 메시지 스타일 구문*/
-#messages {
-  list-style: none;
-  padding: 0;
-  margin-bottom: 1rem;
-}
-#messages li {
-  padding: 0.75rem 1rem;
-  border-radius: 4px;
-  margin-bottom: 0.5rem;
-  font-size: 0.95rem;
-}
-
-/* 성공 메시지 (예: 로그인 성공, 저장 성공 등) */
-#messages li.success {
-  background: #e6ffed;
-  color: #22863a;
-  border: 1px solid #b2f5c0;
-}
-
-/* 위험 메시지 (예: 비밀번호 오류, 로그인 실패 등) */
-#messages li.danger {
-  background: #ffeef0;
-  color: #cb2431;
-  border: 1px solid #f5c2c7;
-}
-
-/* 경고 메시지 (예: 로그인 필요 등) */
-#messages li.warning {
-  background: #fff4e5;
-  color: #b26a00;
-  border: 1px solid #ffcc80;
-}
-
-/* 로그인 전용 레이아웃 오버라이드 */
-.container.login-page {
-  margin-left: 0;   /* 사이드바가 없을 때 좌측 여백 제거 */
-}
-body.login-page #global-flash {
-  display: none;
-}
-.employee-detail { padding: 20px; }
-.profile-header {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 30px;
-}
-.profile-photo img {
-  width: 150px;
-  height: 150px;
-  object-fit: cover;
-  border-radius: 8px;
-}
-.profile-summary { display: flex; flex-direction: column; justify-content: center; }
-.profile-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-}
-.grid-item { background: #fff; padding: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-.grid-item strong { display: block; margin-bottom: 8px; color: #333; }
-
-/* ── 팀명 헤딩 (카드 너비 전체 색상 백그라운드) ── */
+/* — 직원 목록 카드를 위한 커스텀 — */
 .team-heading {
-  display: block;
-  width: 100%;
-  margin: 1.5rem 0 1rem;
-  padding: 0.5rem 1rem;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: midnightblue;
-  background-color: lightsteelblue;
-  border-radius: 0.25rem;
+  display: block; width: 100%; margin: 1.5rem 0 1rem; padding: 0.5rem 1rem;
+  font-size: 1.25rem; font-weight: 600; color: midnightblue; background-color: lightsteelblue; border-radius: 0.25rem;
 }
-
-/* ── 테이블 구조 풀어서 flex 항목으로 ── */
-.emp-table,
-.emp-table thead,
-.emp-table tbody {
-  display: contents !important;
-}
-
-/* ── 카드 컨테이너: flex 그리드 ── */
-.table-responsive {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin: 0;
-  padding: 0;
-  overflow: visible;    /* 툴팁 확장 허용 */
-}
-
-/* ── emp-row를 카드로 (한 줄에 최대 3장, 카드 크기 조정) ── */
+.emp-table, .emp-table thead, .emp-table tbody { display: contents !important; }
+.table-responsive { display: flex; flex-wrap: wrap; gap: 1rem; margin: 0; padding: 0; overflow: visible; }
 .emp-row {
-  background: #fff;
-  padding: 1.5rem;
-  border-radius: 8px;
+  background: #fff; padding: 1.5rem; border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: transform var(--transition-speed), box-shadow var(--transition-speed);
-  cursor: pointer;
-  position: relative;
-
-  /* flex basis: 30%에 최대 너비 350px, 최소 너비 200px */
-  flex: 1 1 30%;
-  max-width: 350px;
-  min-width: 200px;
-  box-sizing: border-box;
-}
-.emp-row:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
-}
-
-/* ── emp-row 내부 레이아웃 ── */
-.emp-row {
-  display: grid;
-  /* 1열을 넓게(팀명) / 2열을 좁게(MBTI) */
-  grid-template-columns: 1.5fr 1fr;
+  cursor: pointer; position: relative;
+  flex: 1 1 30%; max-width: 350px; min-width: 200px; box-sizing: border-box;
+  display: grid; grid-template-columns: 1.5fr 1fr;
   grid-template-areas:
     "name ext"
     "team mbti"
     "position position";
   gap: 0.25rem 0.5rem;
 }
-
-/* 영역 배치 */
-.emp-row td:nth-child(1) { grid-area: name; }
-.emp-row td:nth-child(4) { grid-area: ext; }
-.emp-row td:nth-child(2) { grid-area: team; /* 줄바꿈 방지 */ white-space: nowrap; word-break: keep-all; }
-.emp-row td:nth-child(5) { grid-area: mbti; justify-self: start; }
-.emp-row td:nth-child(3) { grid-area: position; }
-
-/* 기존 ::before 라벨 스타일 */
-.emp-row td {
-  display: block;
-  padding: 0.25rem 0;
-  color: var(--color-grey);
-}
+.emp-row:hover { transform: translateY(-4px); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2); }
+.emp-row td { display: block; padding: 0.25rem 0; color: var(--color-grey); }
 .emp-row td:nth-child(1)::before { content: "이름: ";      font-weight:600; color:var(--color-primary); }
 .emp-row td:nth-child(4)::before { content: "내선번호: ";  font-weight:600; color:var(--color-primary); }
 .emp-row td:nth-child(2)::before { content: "팀: ";        font-weight:600; color:var(--color-primary); }
 .emp-row td:nth-child(5)::before { content: "MBTI: ";      font-weight:600; color:var(--color-primary); }
 .emp-row td:nth-child(3)::before { content: "직책: ";      font-weight:600; color:var(--color-primary); }
 
-
-/* ── 툴팁 아이콘 자리 (추후 HTML/JS로 삽입) ── */
-/* .tooltip-cell::before {  // 아이콘 삽입 주석 } */
-.tooltip-cell {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-}
-
-/* ── 툴팁 박스 & 호버 효과 ── */
+.tooltip-cell { position: absolute; top: 1rem; right: 1rem; }
 .tooltip {
-  visibility: hidden;
-  opacity: 0;
-  position: absolute;
-  top: 50%;
-  left: calc(100% + 0.5rem);
-  transform: translateY(-50%);
-  min-width: 10rem;
-  background-color: var(--color-neutral-lighter);
-  border: 1px solid var(--color-border);
-  padding: 0.75rem;
-  border-radius: 0.25rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  white-space: nowrap;
-  z-index: 1000;
-  transition: opacity var(--transition-speed), visibility var(--transition-speed);
+  visibility: hidden; opacity: 0; position: absolute; top: 50%;
+  left: calc(100% + 0.5rem); transform: translateY(-50%); min-width: 10rem;
+  background-color: var(--color-neutral-lighter); border: 1px solid var(--color-border);
+  padding: 0.75rem; border-radius: 0.25rem; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  white-space: nowrap; z-index: 1000; transition: opacity var(--transition-speed), visibility var(--transition-speed);
   color: #333;
 }
-.tooltip-cell:hover .tooltip,
-.emp-row:hover .tooltip {
-  visibility: visible;
-  opacity: 1;
-}
+.tooltip-cell:hover .tooltip, .emp-row:hover .tooltip { visibility: visible; opacity: 1; }
 
-/* ── 반응형: 2열, 1열 ── */
-@media (max-width: 800px) {
-  .emp-row { flex: 1 1 calc((100% - 1rem) / 2); max-width: none; }
-}
-@media (max-width: 500px) {
-  .emp-row { flex: 1 1 100%; }
-}
-/* 직원 상세 정보 페이지 추가 스타일 */
+@media (max-width: 800px) { .emp-row { flex: 1 1 calc((100% - 1rem) / 2); max-width: none; } }
+@media (max-width: 500px) { .emp-row { flex: 1 1 100%; } }
 
-/* 직원 상세 페이지 특화 스타일 */
-.employee-detail {
-    background: #e0e4eb;
-    padding: 2rem;
-    border-radius: 8px;
-}
-
-/* 개선된 프로필 헤더 레이아웃 */
+/* — 직원 상세 페이지 특화 — */
+.employee-detail { background: #e0e4eb; padding: 2rem; border-radius: 8px; }
 .profile-header {
-    display: flex;
-    gap: 2rem;
-    margin-bottom: 2rem;
-    background: #fff;
-    padding: 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-    align-items: flex-start;
+  display: flex; gap: 2rem; margin-bottom: 2rem; background: #fff; padding: 1.5rem;
+  border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); align-items: flex-start;
 }
+.profile-summary { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.profile-item { background: #ffffff; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); transition: transform var(--transition-speed), box-shadow var(--transition-speed); border-left: 4px solid var(--color-primary); }
+.profile-item:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.firo-group { display: flex; gap: 0.5rem; }
+.firo-group input { text-align: center; font-weight: 600; }
+.profile-item-wide { grid-column: 1 / -1; }
 
-.profile-photo {
-    flex-shrink: 0;
-}
-
-.profile-photo img {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid #fff;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.profile-summary {
-    flex: 1;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-}
-
-/* 프로필 그리드 개선 */
-.profile-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-}
-
-.profile-item {
-    background: #ffffff;
-    padding: 1rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
-    border-left: 4px solid var(--color-primary);
-}
-
-.profile-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.profile-item label {
-    font-size: 0.85rem;
-    color: var(--color-grey);
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    display: block;
-}
-
-.profile-item input,
-.profile-item textarea,
-.profile-item select {
-    width: 100%;
-    padding: 0.5rem;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background: #fff;
-    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
-}
-
-.profile-item input:focus,
-.profile-item textarea:focus,
-.profile-item select:focus {
-    outline: none;
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(0,123,255,0.15);
-}
-
-.profile-item input:disabled,
-.profile-item textarea:disabled,
-.profile-item select:disabled {
-    background: var(--color-neutral-lighter);
-    color: #999;
-    cursor: not-allowed;
-}
-
-/* FIRO-B 그룹 스타일 */
-.firo-group {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.firo-group input {
-    text-align: center;
-    font-weight: 600;
-}
-
-/* 넓은 아이템 */
-.profile-item-wide {
-    grid-column: 1 / -1;
-}
-
-/* 섹션 표시/숨김 */
-.profile-section {
-    display: none;
-}
-
-.profile-section.active {
-    display: block;
-}
-
-/* 액션 버튼 영역 */
-.form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-/* 반응형 디자인 */
-@media (max-width: 768px) {
-    .employee-detail {
-        padding: 1rem;
-    }
-
-    .profile-header {
-        flex-direction: column;
-        text-align: center;
-        gap: 1.5rem;
-    }
-
-    .profile-summary {
-        grid-template-columns: 1fr;
-    }
-
-    .profile-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .form-actions {
-        justify-content: center;
-    }
-}
-/* 직원 상세 - 길어질 수 있는 textarea UX 강화 */
-.profile-item textarea {
-  min-height: 3rem;
-  resize: vertical;       /* 사용자가 직접 늘릴 수도 있게 */
-  white-space: pre-wrap;  /* \n을 시각적으로 유지 */
-  line-height: 1.4;
-}
-
-/* 자동 높이 증가 동작 시 스크롤바 숨김 */
-textarea.auto-grow {
-  overflow: hidden;
-}
-/* 탭 섹션 표시/숨김 */
+/* 섹션 표시/숨김 (JS에서 .active + hidden 속성과 연동) */
 .profile-section { display: none; }
 .profile-section.active { display: block; }
+
+/* 액션 버튼 영역 */
+.form-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-bottom: 1.5rem; }
+
+/* 텍스트에어리어 UX */
+.profile-item textarea { min-height: 3rem; resize: vertical; white-space: pre-wrap; line-height: 1.4; }
+textarea.auto-grow { overflow: hidden; }
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .employee-detail { padding: 1rem; }
+  .profile-header { flex-direction: column; text-align: center; gap: 1.5rem; }
+  .profile-summary { grid-template-columns: 1fr; }
+  .profile-grid { grid-template-columns: 1fr; }
+  .form-actions { justify-content: center; }
+}

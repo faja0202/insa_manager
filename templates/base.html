@@ -15,12 +15,10 @@
       <nav>
         <a href="{{ url_for('main') }}" class="{% if request.endpoint == 'main' %}active{% endif %}">홈</a>
         <a href="{{ url_for('employee_list') }}" class="{% if request.endpoint == 'employee_list' %}active{% endif %}">직원목록</a>
-        <a href="{{ url_for('interview_records') }}" class="{% if request.endpoint == 'interview_records' %}active{% endif %}">근태정보</a>
-        <a href="{{ url_for('profile') }}" class="{% if request.endpoint == 'profile' %}active{% endif %}">면담기록</a>
       </nav>
       <div class="header-actions">
         <div class="search-box">
-          <input type="text" placeholder="인원 검색..." onkeypress="if(event.keyCode===13){window.location.href='{{ url_for('employee_search') }}?q='+this.value;}">
+          <input type="text" placeholder="인원 검색..." onkeypress="if(event.keyCode===13){window.location.href='{{ url_for('employee_list') }}?q='+this.value;}">
         </div>
         <div class="user-info">
           <span>{{ current_user.id }}</span>
@@ -32,17 +30,7 @@
 
   <div class="container">
     <!-- 전역 플래시 메시지 -->
-    <div id="global-flash">
-      {% with messages = get_flashed_messages(with_categories=True) %}
-        {% if messages %}
-          <ul id="messages">
-            {% for category, msg in messages %}
-              <li class="{{ category }}">{{ msg }}</li>
-            {% endfor %}
-          </ul>
-        {% endif %}
-      {% endwith %}
-    </div>
+
 
     {% block content %}{% endblock %}
   </div>
