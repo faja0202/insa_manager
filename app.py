@@ -1,4 +1,3 @@
-# app.py (주석 강화 & 안전성/UX 개선)
 # ─────────────────────────────────────────────────────────────────────
 # 주요 변경 요약
 # 1) 엑셀 로드 시 상세 화면에서 쓰는 모든 컬럼 자동 보강(_ensure_all_columns)
@@ -21,6 +20,7 @@ from datetime import datetime, timedelta
 from threading import Lock
 from pathlib import Path
 from typing import Set, Dict, List
+import json
 
 # ============================
 # [3RD PARTY]
@@ -43,7 +43,6 @@ from werkzeug.exceptions import NotFound
 # ============================
 APP_ROOT: Path = Path(__file__).resolve().parent
 
-# DB는 private/db/insa_DB.xlsx 로 관리
 DB_DIR: Path = APP_ROOT / "private" / "db"
 DB_DIR.mkdir(parents=True, exist_ok=True)                     # 폴더 없으면 생성
 DB_FILENAME: str = os.getenv("DB_FILENAME", "insa_DB.xlsx")
@@ -280,7 +279,7 @@ def handle_needs_login():
     flash("로그인이 필요합니다.", "warning")
     return redirect(url_for("login", next=request.url))
 
-# 개발 간편 계정(운영 전환 권장)
+# : 쌍으로 ID PW 순 나열해 추가
 ADMIN_USERS_INLINE: Dict[str, str] = {
     "admin": "1234",
     "assesta": "0820",
@@ -382,7 +381,7 @@ def employee_list():
     - team_order 우선 정렬
     - q 파라미터로 서버사이드 간단 검색
     """
-    team_order = ["테스트팀", "경영지원팀", "플랫폼솔루션개발팀", "센터"]
+    team_order = ["경영진", "플랫폼솔루션개발팀", "경영지원팀", "센터"]
     df = load_df()
 
     if "extension_number" not in df.columns:
@@ -431,32 +430,46 @@ def employee_detail(name: str):
     if request.method == "POST":
         mask = df["name"] == name
 
-        # 변경 전 스냅샷(로그용)
-        before = df.loc[mask].iloc[0].to_dict()
+        # 1) 기존 행 스냅샷
+        row_old: Dict[str, str] = df.loc[mask].iloc[0].to_dict()
 
-        # 반영
+        # 2) 전체 행 복사 후 폼값만 덮어쓰기(서버 정규화 포함)
+        row_new: Dict[str, str] = dict(row_old)
         for form_key in request.form:
-            if form_key == "name":  # 이름은 식별자, 변경 금지
+            if form_key == "name":  # 식별자 변경 금지
                 continue
             value = request.form.get(form_key, "").strip()
             if form_key in DATE_FIELDS_IN_FORM:
                 value = to_iso_date(value)
             if form_key == "salary":
                 value = normalize_salary(value)
-            if form_key not in df.columns:
-                df[form_key] = ""
-            df.loc[mask, form_key] = value
+            if form_key in df.columns:
+                row_new[form_key] = value
+            else:
+                # 필요 시 신규 컬럼 허용 정책이면 다음 줄 주석 해제
+                # df[form_key] = ""; row_new[form_key] = value
+                pass
 
-        # 저장
-        save_df(df)
+        # 3) 변경점 계산
+        diffs = _diff_row(row_old, row_new)
 
-        # 변경 후 스냅샷 및 변경 로그 기록
-        after = df.loc[mask].iloc[0].to_dict()
-        diffs = _diff_row(before, after)
-        _append_change_log(employee=name, user=(current_user.id if current_user.is_authenticated else "-"), changes=diffs)
+        # 4) 변경된 필드만 실제 저장 + 로그 기록
+        for ch in diffs:
+            df.loc[mask, ch["field"]] = ch["new"]
 
-        flash("수정사항이 저장되었습니다.", "success")
+        if diffs:
+            save_df(df)
+            _append_change_log(
+                employee=name,
+                user=(current_user.id if current_user.is_authenticated else "-"),
+                changes=diffs,
+            )
+            flash("수정사항이 저장되었습니다.", "success")
+        else:
+            flash("변경사항이 없습니다.", "warning")
+
         return redirect(url_for("employee_detail", name=name), code=303)
+
 
     # GET: 표시 데이터 가공
     row = df.loc[df["name"] == name].iloc[0].to_dict()
@@ -505,6 +518,20 @@ def resume_view(name: str):
         )
     except NotFound:
         abort(404)
+        
+@app.route("/employees/<name>/resume/check", methods=["GET"])
+@login_required
+def resume_check(name: str):
+    """
+    이력서 존재 여부 확인용 API
+    """
+    try:
+        fp = _resume_path(name)
+        if not fp.exists():
+            return {"exists": False}, 200
+        return {"exists": True, "url": url_for("resume_view", name=name)}, 200
+    except NotFound:
+        return {"exists": False}, 200
 
 def _photo_path(name: str) -> Path:
     """

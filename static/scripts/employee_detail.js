@@ -139,3 +139,24 @@
     });
   });
 })();
+
+// ============================
+// Resume PDF 체크 및 팝업용 스크립트
+// ============================
+function checkResume(name) {
+  fetch(`/employees/${name}/resume/check`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.exists) {
+        window.open(data.url, '_blank');
+      } else {
+        const modal = document.getElementById("resume-modal");
+        if (modal) modal.style.display = "flex";
+      }
+    });
+}
+
+function closeModal() {
+  const modal = document.getElementById("resume-modal");
+  if (modal) modal.style.display = "none";
+}
